@@ -1,61 +1,206 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hospitality Starter — Laravel + Inertia/React (i18n-first)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Starter projekat za ugostiteljstvo/turizam sa **višejezičnošću od starta**: `/{locale}` prefiks (sr-Latn-RS, sr-Cyrl-RS, en), Inertia/React UI, SEO `hreflang`, i demo CMS stranica sa JSON prevodima (Spatie Translatable).
 
-## About Laravel
+> Tag: `v0.1.0` — i18n osnova spremna kao template za nove projekte.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Šta je unutra
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Laravel 12** + PHP 8.2+
+- **Inertia + React 18** (Vite)
+- **Breeze** (auth skeleton)
+- **i18n osnova**:  
+  - `config/i18n.php` (default, fallback, supported)  
+  - `SetLocale` middleware + `/{locale}` rute  
+  - Inertia share (`locale`, `locales`, `auth`)  
+  - React i18next + `LanguageSwitcher` komponenta  
+  - SEO `hreflang` Blade komponenta  
+- **CMS demo**: `Page` model (translatable JSON), migracija, seeder, ruta i Inertia prikaz
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Brzi start (Windows/XAMPP)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Prereq**
+- PHP 8.2+, Composer
+- Node 18+ (npm/pnpm)
+- MySQL 8+ (XAMPP) — napravi bazu npr. `hospitality_db`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Setup**
+```bash
+composer install
+cp .env.example .env
 
-## Laravel Sponsors
+# .env minimalno:
+# APP_URL=http://127.0.0.1:8088
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=hospitality_db
+# DB_USERNAME=root
+# DB_PASSWORD=
+# CACHE_DRIVER=file
+# SESSION_DRIVER=file
+# QUEUE_CONNECTION=sync
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+php artisan key:generate
+php artisan migrate
+php artisan db:seed --class=PageSeed
+Dev serveri (dva termina)
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 1) PHP dev (ako artisan serve ne radi na Win):
+php -S 127.0.0.1:8088 -t public
 
-## Contributing
+# 2) Vite dev:
+npm install
+npm run dev
+Otvori
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+http://127.0.0.1:8088/sr-Latn-RS/
 
-## Code of Conduct
+http://127.0.0.1:8088/sr-Cyrl-RS/
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+http://127.0.0.1:8088/en/
 
-## Security Vulnerabilities
+Demo CMS Page (čitanje prevoda iz DB):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+/sr-Latn-RS/stranica/kako-funkcionise
 
-## License
+/sr-Cyrl-RS/stranica/како-функционише
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+/en/stranica/how-it-works
+
+i18n – kako je rešeno
+Konfig jezika: config/i18n.php
+(default: sr-Latn-RS, fallback: en, supported: sr-Latn-RS, sr-Cyrl-RS, en)
+
+Middleware: app/Http/Middleware/SetLocale.php
+
+Rute: routes/web.php → sve javne rute pod /{locale} prefiksom.
+
+SEO: resources/views/components/seo/hreflang.blade.php uključeno u resources/views/app.blade.php
+
+Inertia share: u AppServiceProvider@boot() deli: locale, locales, auth
+
+React i18n: resources/js/i18n/index.js + resources/js/Components/LanguageSwitcher.jsx
+
+Dodavanje novog jezika
+
+Dodaj ga u config/i18n.php (npr. de, it, hu …).
+
+Dodaj UI ključeve u resources/js/i18n/index.js.
+
+(Po potrebi) Unesi prevode u translatable polja (Page, kasnije Plan/Meal).
+
+Hreflang linkovi se generišu automatski.
+
+Struktura (ključni delovi)
+
+app/
+  Domain/Cms/Page.php                # translatable (Spatie)
+  Http/Middleware/SetLocale.php
+  Providers/AppServiceProvider.php   # Inertia::share(...)
+
+config/i18n.php
+
+database/
+  migrations/****_create_pages_table.php
+  seeders/PageSeed.php
+
+resources/
+  js/
+    app.jsx                          # initI18n + glob za Pages
+    i18n/index.js
+    Components/LanguageSwitcher.jsx
+    Pages/Welcome.jsx
+    Pages/PageView.jsx
+  views/app.blade.php                # @vite, @inertia, @include hreflang
+  views/components/seo/hreflang.blade.php
+
+routes/web.php                       # {locale} grupa + demo Page ruta
+Build (bez dev servera)
+
+npm run build
+# koristi public/build/manifest.json
+Troubleshooting (najčešće)
+ERR_CONNECTION_REFUSED → dev server nije upaljen. Pokreni:
+php -S 127.0.0.1:8088 -t public
+
+Unable to locate file in Vite manifest: ... → pokreni npm run dev ili npm run build; proveri da app.jsx globuje ./Pages/**/*.jsx.
+
+Class Inertia not found ili App\Providers\Inertia → dodaj use Inertia\Inertia; (i use Illuminate\Support\Facades\Vite;) u AppServiceProvider.
+
+SQLite i JSON (JSON_UNQUOTE not found) → koristi MySQL (preporuka) ili SQLite-kompatibilan upit (json_extract uz navodnike).
+
+optimize:clear traži cache tabelu → u .env koristi CACHE_DRIVER=file i SESSION_DRIVER=file za dev ili napravi tabele:
+php artisan cache:table && php artisan session:table && php artisan migrate.
+
+Korišćenje kao template
+Preporuka: u GitHub repou uključite Settings → Template repository i pokrećite nove projekte klikom na Use this template.
+
+Nakon kreiranja, uradite: composer install, .env, migrate, db:seed, npm install, npm run dev.
+
+Git grane & tagovi
+main — template (stabilno)
+
+feature/* — nove funkcionalnosti (npr. feature/order-wizard)
+
+Tagovi:
+
+v0.1.0 — i18n foundation
+
+.gitattributes (LF preporuka)
+
+* text=auto
+*.php       text eol=lf
+*.blade.php text eol=lf
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.css       text eol=lf
+*.scss      text eol=lf
+*.json      text eol=lf
+*.md        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.png  -text
+*.jpg  -text
+*.jpeg -text
+*.gif  -text
+*.webp -text
+*.ico  -text
+*.pdf  -text
+*.ttf  -text
+*.otf  -text
+*.woff -text
+*.woff2 -text
+Renormalizacija:
+
+
+git add --renormalize .
+git commit -m "chore(gitattributes): normalize line endings"
+Roadmap (predloga za sledeće korake)
+Order Wizard 1–5: plan → kcal → trajanje → adresa/zone → potvrda
+
+obračun iz price_matrix
+
+validacija zone/prozora
+
+kreiranje orders
+
+PDF predračun + email potvrda
+
+Delivery: zone/windows/shipping + manifest i export kurirskih ruta
+
+Admin (Filament): Orders Kanban, Menu Builder, Price Matrix
+
+Payments V2: Stripe/PayPal (kasnije), fiskalni modul (Srbija)
+
+Mobile (RN/Expo): klijentska app + “assistant waiter” (stolovi, KDS)
+
+Licenca
+Starter je deo internih radova za Hospitality/Tourism ponudu. Open-source delovi prate licence svojih autora (Laravel, Breeze, itd.).
